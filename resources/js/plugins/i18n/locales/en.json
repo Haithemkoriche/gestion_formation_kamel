@@ -211,6 +211,8 @@
     }
   },
   "Gestion des Formations": "Training Management",
+  "Gestion du Personnel": "Personnel Management",
+  "Gestion Type de formation": "Formation Type Management",
   "Formations": "Trainings",
   "Ajouter Formation": "Add Training",
   "Modifier Formation": "Edit Training",

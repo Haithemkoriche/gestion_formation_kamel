@@ -265,5 +265,7 @@
   "Update": "Mettre à jour",
   "Please fill all required fields.": "Veuillez remplir tous les champs obligatoires.",
   "Error saving admin:": "Erreur lors de l'enregistrement de l'administrateur:",
-  "Error deleting admin:": "Erreur lors de la suppression de l'administrateur:"
+  "Error deleting admin:": "Erreur lors de la suppression de l'administrateur:",
+  "Gestion du Personnel": "Gestion du Personnel",
+  "Gestion Type de formation": "Gestion Type de formation"
 }

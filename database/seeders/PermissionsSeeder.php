@@ -20,7 +20,7 @@ class PermissionsSeeder extends Seeder
             'edit_categories',
             'delete_categories',
             'create_categories',
-        ];
+        ];  
 
         // Create Permissions
         foreach ($permissions as $permission) {

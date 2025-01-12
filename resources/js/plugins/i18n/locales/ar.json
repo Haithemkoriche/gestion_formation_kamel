@@ -264,5 +264,7 @@
   "Update": "تحديث",
   "Please fill all required fields.": "يرجى ملء جميع الحقول المطلوبة.",
   "Error saving admin:": "خطأ في حفظ المسؤول:",
-  "Error deleting admin:": "خطأ في حذف المسؤول:"
+  "Error deleting admin:": "خطأ في حذف المسؤول:",
+  "Gestion du Personnel": "إدارة شؤون الموظفين",
+  "Gestion Type de formation": "إدارة نوع الشهادة"
 }
