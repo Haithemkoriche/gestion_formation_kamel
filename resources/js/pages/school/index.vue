@@ -10,7 +10,7 @@
       <VTextField v-model="school.name" :label="$t('School Name')" required></VTextField>
       <VTextField v-model="school.address" :label="$t('Address')" required></VTextField>
       <VTextField v-model="school.phone" :label="$t('Phone')"></VTextField>
-      <VTextField v-model="school.email" :label="$t('Email')" required></VTextField>
+      <!-- <VTextField v-model="school.email" :label="$t('Email')" required></VTextField> -->
       <v-btn type="submit" color="success">
         {{ isEditing ? $t('Update School') : $t('Add School') }}
       </v-btn>
@@ -47,7 +47,7 @@ export default {
         name: "",
         address: "",
         phone: "",
-        email: "",
+        //email: "",
       },
       schools: [],
       successMessage: "",
@@ -56,7 +56,7 @@ export default {
         { title: "Name", value: "name" },
         { title: "Address", value: "address" },
         { title: "Phone", value: "phone" },
-        { title: "Email", value: "email" },
+        // { title: "Email", value: "email" },
         { title: "Actions", value: "actions", sortable: false },
       ],
       isEditing: false,
@@ -115,7 +115,7 @@ export default {
         name: "",
         address: "",
         phone: "",
-        email: "",
+        // email: "",
       };
       this.isEditing = false;
       this.editingSchoolId = null;

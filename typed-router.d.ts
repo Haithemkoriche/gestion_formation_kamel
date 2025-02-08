@@ -23,10 +23,12 @@ declare module 'vue-router/auto-routes' {
     'admins': RouteRecordInfo<'admins', '/admins', Record<never, never>, Record<never, never>>,
     'categories': RouteRecordInfo<'categories', '/categories', Record<never, never>, Record<never, never>>,
     'employes': RouteRecordInfo<'employes', '/employes', Record<never, never>, Record<never, never>>,
+    'etudiants': RouteRecordInfo<'etudiants', '/etudiants', Record<never, never>, Record<never, never>>,
     'formations': RouteRecordInfo<'formations', '/formations', Record<never, never>, Record<never, never>>,
     'formations-type': RouteRecordInfo<'formations-type', '/formations/type', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'school': RouteRecordInfo<'school', '/school', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
+    'stagiaires': RouteRecordInfo<'stagiaires', '/stagiaires', Record<never, never>, Record<never, never>>,
   }
 }

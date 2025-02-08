@@ -2,43 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\EmployesExport;
+use App\Exports\EtudiantsExport;
 use App\Models\Employe;
+use App\Models\Etudiant;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use Barryvdh\DomPDF\PDF;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
-class EmployeController extends Controller
+class EtudiantController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Employe::query();
-    
-        // Filtrer par statut
-        if ($request->status) {
-            $query->where('status', $request->status);
-        }
-    
-        // Recherche
+        $query = Etudiant::query();
+
+        // Fonctionnalité de recherche
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('nom', 'LIKE', "%{$request->search}%")
-                  ->orWhere('prenom', 'LIKE', "%{$request->search}%")
-                  ->orWhere('matricule', 'LIKE', "%{$request->search}%");
+                    ->orWhere('prenom', 'LIKE', "%{$request->search}%")
+                    ->orWhere('matricule', 'LIKE', "%{$request->search}%")
+                    ->orWhere('unite', 'LIKE', "%{$request->search}%");
             });
         }
-    
-        return $query->orderBy('nom')->get();
-    }
-    public function stagiaires(Request $request)
-    {
-        // Filtrer les employés avec le statut "stage"
-        $stagiaires = Employe::where('status', 'stage')->get();
-        return $stagiaires;
 
-        // return view('stagiaires.index', compact('stagiaires'));
+        // Filtres
+        if ($request->grade) {
+            $query->where('grade', $request->grade);
+        }
+        if ($request->unite) {
+            $query->where('unite', $request->unite);
+        }
+
+        return $query->orderBy('nom')->get();
     }
 
     public function store(Request $request)
@@ -56,7 +53,7 @@ class EmployeController extends Controller
             'numero_telephone' => 'string|max:255',
             'niveau_scolaire' => 'string|max:255',
             'grade' => 'string|max:255',
-            'matricule' => 'string|max:255|unique:employes',
+            'matricule' => 'string|max:255|unique:etudiants',
             'unite' => 'string|max:255',
             'nom_entreprise' => 'string|max:255',
             'date_de_recrutement' => 'date',
@@ -85,15 +82,15 @@ class EmployeController extends Controller
             'etat_sante' => 'nullable|string|max:255',
         ]);
 
-        return Employe::create($validated);
+        return Etudiant::create($validated);
     }
 
-    public function show(Employe $employe)
+    public function show(Etudiant $etudiant)
     {
-        return $employe;
+        return $etudiant;
     }
 
-    public function update(Request $request, Employe $employe)
+    public function update(Request $request, Etudiant $etudiant)
     {
         $validated = $request->validate([
             'nom' => 'string|max:255',
@@ -108,7 +105,7 @@ class EmployeController extends Controller
             'numero_telephone' => 'string|max:255',
             'niveau_scolaire' => 'string|max:255',
             'grade' => 'string|max:255',
-            'matricule' => ['string', 'max:255', Rule::unique('employes')->ignore($employe->id_employe, 'id_employe')],
+            'matricule' => ['string', 'max:255', Rule::unique('etudiants')->ignore($etudiant->id_etudiant, 'id_etudiant')],
             'unite' => 'string|max:255',
             'nom_entreprise' => 'string|max:255',
             'date_de_recrutement' => 'date',
@@ -137,38 +134,38 @@ class EmployeController extends Controller
             'etat_sante' => 'nullable|string|max:255',
         ]);
 
-        $employe->update($validated);
-        return $employe;
+        $etudiant->update($validated);
+        return $etudiant;
     }
 
-    public function destroy(Employe $employe)
+    public function destroy(Etudiant $etudiant)
     {
-        $employe->delete();
+        $etudiant->delete();
         return response()->json(null, 204);
     }
 
     public function exportExcel(Request $request)
     {
-        $employes = $this->getFilteredEmployes($request);
-        return Excel::download(new EmployesExport($employes), 'employes.xlsx');
+        $etudiants = $this->getFilteredEtudiants($request);
+        return Excel::download(new EtudiantsExport($etudiants), 'etudiants.xlsx');
     }
 
     public function exportPDF(Request $request)
     {
-        $employes = $this->getFilteredEmployes($request);
-        $pdf = FacadePdf::loadView('exports.employes', compact('employes'));
-        return $pdf->download('employes.pdf');
+        $etudiants = $this->getFilteredEtudiants($request);
+        $pdf = FacadePdf::loadView('exports.etudiants', compact('etudiants'));
+        return $pdf->download('etudiants.pdf');
     }
 
-    public function exportSinglePDF(Employe $employe)
+    public function exportSinglePDF(Etudiant $etudiant)
     {
-        $pdf = FacadePdf::loadView('exports.employe-single', compact('employe'));
-        return $pdf->download("employe-{$employe->id_employe}.pdf");
+        $pdf = FacadePdf::loadView('exports.etudiant-single', compact('etudiant'));
+        return $pdf->download("etudiant-{$etudiant->id_etudiant}.pdf");
     }
 
-    private function getFilteredEmployes(Request $request)
+    private function getFilteredEtudiants(Request $request)
     {
-        $query = Employe::query();
+        $query = Etudiant::query();
 
         if ($request->search) {
             $query->where(function ($q) use ($request) {
@@ -180,22 +177,68 @@ class EmployeController extends Controller
 
         return $query->get();
     }
-    public function convertToStage($id)
+    // Dans EtudiantController.php
+    public function convertToEmployee($id)
     {
         try {
-            // Récupérer l'employé
-            $employe = Employe::findOrFail($id);
+            // Récupérer l'étudiant
+            $etudiant = Etudiant::findOrFail($id);
 
-            // Vérifier si l'employé est déjà en stage
-            if ($employe->status === 'stage') {
-                return response()->json(['message' => 'Cet employé est déjà en stage.'], 400);
+            // Vérifier si l'étudiant existe déjà en tant qu'employé
+            $employeExiste = Employe::where('matricule', $etudiant->matricule)->exists();
+            if ($employeExiste) {
+                return response()->json(['message' => 'Cet étudiant est déjà converti en employé.'], 400);
             }
 
-            // Mettre à jour le statut de l'employé
-            $employe->update(['status' => 'stage']);
+            // Créer un nouvel employé avec les données de l'étudiant
+            $employe = Employe::create([
+                'nom' => $etudiant->nom,
+                'prenom' => $etudiant->prenom,
+                'sexe' => $etudiant->sexe,
+                'date_de_naissance' => $etudiant->date_de_naissance,
+                'lieu_de_naissance' => $etudiant->lieu_de_naissance,
+                'pays' => $etudiant->pays,
+                'nationalite' => $etudiant->nationalite,
+                'adresse_actuelle' => $etudiant->adresse_actuelle,
+                'situation_familiale' => $etudiant->situation_familiale,
+                'numero_telephone' => $etudiant->numero_telephone,
+                'niveau_scolaire' => $etudiant->niveau_scolaire,
+                'grade' => $etudiant->grade,
+                'matricule' => $etudiant->matricule,
+                'unite' => $etudiant->unite,
+                'nom_entreprise' => $etudiant->nom_entreprise,
+                'date_de_recrutement' => $etudiant->date_de_recrutement,
+                'mode_engagement' => $etudiant->mode_engagement,
+                'date_mise_a_niveau' => $etudiant->date_mise_a_niveau,
+                'date_nomination_active' => $etudiant->date_nomination_active,
+                'fonction_actuelle' => $etudiant->fonction_actuelle,
+                'annee_scolaire' => $etudiant->annee_scolaire,
+                'type_formation' => $etudiant->type_formation,
+                'nature_diplome' => $etudiant->nature_diplome,
+                'specialite' => $etudiant->specialite,
+                'specialite_partielle' => $etudiant->specialite_partielle,
+                'lieu_formation' => $etudiant->lieu_formation,
+                'annee_formation' => $etudiant->annee_formation,
+                'duree_formation' => $etudiant->duree_formation,
+                'diplome_obtenu' => $etudiant->diplome_obtenu,
+                'formations_precedentes' => $etudiant->formations_precedentes,
+                'date_obtention_diplome' => $etudiant->date_obtention_diplome,
+                'diplomes_precedents' => $etudiant->diplomes_precedents,
+                'autres_diplomes' => $etudiant->autres_diplomes,
+                'cycle' => $etudiant->cycle,
+                'date_debut_formation' => $etudiant->date_debut_formation,
+                'date_fin_formation' => $etudiant->date_fin_formation,
+                'punition' => $etudiant->punition,
+                'convalescences' => $etudiant->convalescences,
+                'etat_sante' => $etudiant->etat_sante,
+            ]);
+
+            // Supprimer l'étudiant (ou le marquer comme converti)
+            // $etudiant->delete(); 
+            // Ou $etudiant->update(['converted' => true]);
 
             return response()->json([
-                'message' => 'Employé converti en stage avec succès',
+                'message' => 'Étudiant converti en employé avec succès',
                 'employe' => $employe,
             ], 200);
         } catch (\Exception $e) {

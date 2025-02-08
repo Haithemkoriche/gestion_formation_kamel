@@ -18,15 +18,15 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'username' => 'required|string|max:255',
+            // 'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
             'permissions' => 'array'
         ]);
 
         $admin = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'username' => $request->username,
+            // 'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
@@ -48,12 +48,12 @@ class AdminController extends Controller
     public function update(Request $request, User $admin)
     {
         $request->validate([
-            'name' => 'string|max:255',
-            'email' => 'email|unique:users,email,' . $admin->id,
+            'username' => 'string|max:255',
+            // 'email' => 'email|unique:users,email,' . $admin->id,
             'permissions' => 'array'
         ]);
 
-        $admin->update($request->only('name', 'email'));
+        $admin->update($request->only('username'));
 
         if ($request->permissions) {
             $admin->syncPermissions($request->permissions);

@@ -23,7 +23,7 @@ class SchoolController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'email' => 'required|email|unique:schools,email',
+            // 'email' => 'required|email|unique:schools,email',
         ]);
 
         $school = School::create($validated);
@@ -43,7 +43,7 @@ class SchoolController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'email' => 'required|email|unique:schools,email,' . $school->id,
+            // 'email' => 'required|email|unique:schools,email,' . $school->id,
         ]);
 
         $school->update($validated);

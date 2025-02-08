@@ -28,9 +28,10 @@
         </v-card-title>
         <v-card-text>
           <v-form ref="form">
-            <VTextField class="mb-4" v-model="form.name" :label="$t('Name')" required></VTextField>
-            <VTextField class="mb-4" v-model="form.email" :label="$t('Email')" required></VTextField>
-            <VTextField class="mb-4" v-if="!editMode" v-model="form.password" :label="$t('Password')" type="password" required>
+            <VTextField class="mb-4" v-model="form.username" :label="$t('UserName')" required></VTextField>
+            <!-- <VTextField class="mb-4" v-model="form.email" :label="$t('Email')" required></VTextField> -->
+            <VTextField class="mb-4" v-if="!editMode" v-model="form.password" :label="$t('Password')" type="password"
+              required>
             </VTextField>
             <v-select v-model="form.permissions" :items="permissions" item-title="name" item-value="name"
               :label="$t('Assign Permissions')" multiple></v-select>
@@ -59,14 +60,14 @@ export default {
       editMode: false,
       form: {
         id: null,
-        name: "",
-        email: "",
+        username: "",
+        // email: "",
         password: "", // Added password field
         permissions: [],
       },
       headers: [
-        { title: "Name", value: "name" },
-        { title: "Email", value: "email" },
+        { title: "UserName", value: "username" },
+        // { title: "Email", value: "email" },
         { title: "Actions", value: "actions", sortable: false },
       ],
     };
@@ -83,22 +84,22 @@ export default {
     openCreateDialog() {
       this.dialog = true;
       this.editMode = false;
-      this.form = { id: null, name: "", email: "", password: "", permissions: [] };
+      this.form = { id: null, username: "", password: "", permissions: [] };
     },
     openEditDialog(admin) {
       this.dialog = true;
       this.editMode = true;
-      this.form = { ...admin, permissions: admin.permissions.map((p) => p.name) };
+      this.form = { ...admin, permissions: admin.permissions.map((p) => p.username) };
     },
     async submitForm() {
-      if (!this.form.name || !this.form.email || (!this.editMode && !this.form.password)) {
+      if (!this.form.username || (!this.editMode && !this.form.password)) {
         alert("Please fill all required fields.");
         return;
       }
       try {
         if (this.editMode) {
           await axios.put(`/api/admins/${this.form.id}`, {
-            name: this.form.name,
+            username: this.form.username,
             email: this.form.email,
             permissions: this.form.permissions,
           });

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EmployeController;
+use App\Http\Controllers\EtudiantController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\SchoolController;
 use Illuminate\Http\Request;
@@ -23,3 +24,8 @@ Route::get('/permissions', [AdminController::class, 'getPermissions']); // List 
 // });
 Route::apiResource('formations', FormationController::class);
 Route::apiResource('employes', EmployeController::class);
+Route::apiResource('etudiants', EtudiantController::class);
+Route::post('/etudiants/{id}/convert-to-employee', [EtudiantController::class, 'convertToEmployee']);
+Route::post('/employes/{id}/convert-to-stage', [EmployeController::class, 'convertToStage']);
+// Route::get('/stagiaires', [EmployeController::class, 'stagiaires'])->name('stagiaires');
+Route::get('/stagiaires', [EmployeController::class, 'index'])->name('stagiaires');

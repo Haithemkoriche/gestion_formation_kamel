@@ -6,10 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
-        Schema::create('employes', function (Blueprint $table) {
-            $table->id('id_employe');
+        Schema::create('etudiants', function (Blueprint $table) {
+            $table->id('id_etudiant'); // Clé primaire
             $table->string('nom');
             $table->string('prenom');
             $table->string('sexe');
@@ -46,15 +49,18 @@ return new class extends Migration
             $table->string('cycle');
             $table->date('date_debut_formation');
             $table->date('date_fin_formation');
-            $table->string('punition');
-            $table->string('convalescences');
-            $table->string('etat_sante');
-            $table->timestamps();
+            $table->string('punition')->nullable();
+            $table->string('convalescences')->nullable();
+            $table->string('etat_sante')->nullable();
+            $table->timestamps(); // Ajoute les colonnes created_at et updated_at
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
-        Schema::dropIfExists('employes');
+        Schema::dropIfExists('etudiants');
     }
 };

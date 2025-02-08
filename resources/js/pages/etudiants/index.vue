@@ -2,11 +2,11 @@
   <v-container>
     <v-row justify="space-between" align="center">
       <v-col cols="8">
-        <h1>Gestion des Employees</h1>
+        <h1>Gestion des Étudiants</h1>
       </v-col>
       <v-col cols="4" class="text-right">
         <v-btn color="primary" @click="openDialog()">
-          Ajouter un Employe
+          Ajouter un Étudiant
         </v-btn>
       </v-col>
     </v-row>
@@ -15,15 +15,15 @@
     <v-row>
       <v-col cols="4">
         <v-text-field v-model="search" label="Rechercher" prepend-icon="mdi-magnify" clearable
-          @input="fetchEmployes"></v-text-field>
+          @input="fetchEtudiants"></v-text-field>
       </v-col>
       <v-col cols="3">
         <v-select v-model="selectedGrade" :items="grades" label="Filtrer par grade" clearable
-          @change="fetchEmployes"></v-select>
+          @change="fetchEtudiants"></v-select>
       </v-col>
       <v-col cols="3">
         <v-select v-model="selectedUnite" :items="unites" label="Filtrer par unité" clearable
-          @change="fetchEmployes"></v-select>
+          @change="fetchEtudiants"></v-select>
       </v-col>
       <v-col cols="2">
         <v-menu offset-y>
@@ -44,8 +44,8 @@
       </v-col>
     </v-row>
 
-    <!-- Table des employés -->
-    <v-data-table :headers="headers" :items="employes" :loading="loading" :search="search" class="elevation-1">
+    <!-- Table des étudiants -->
+    <v-data-table :headers="headers" :items="etudiants" :loading="loading" :search="search" class="elevation-1">
       <template v-slot:item.actions="{ item }">
         <v-btn icon small @click="openDialog(item)">
           <v-icon>tabler-pencil</v-icon>
@@ -56,7 +56,8 @@
         <v-btn icon small @click="confirmDelete(item)">
           <v-icon>tabler-trash</v-icon>
         </v-btn>
-        <v-btn icon small @click="convertToStage(item)">
+        <!-- Bouton pour convertir l'étudiant en employé -->
+        <v-btn icon small @click="convertToEmployee(item)">
           <v-icon>tabler-user-plus</v-icon>
         </v-btn>
       </template>
@@ -252,7 +253,7 @@
     <!-- Dialog de confirmation de suppression -->
     <v-dialog v-model="dialogDelete" max-width="500px">
       <v-card>
-        <v-card-title>Êtes-vous sûr de vouloir supprimer cet Employe ?</v-card-title>
+        <v-card-title>Êtes-vous sûr de vouloir supprimer cet Étudiant ?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn @click="deleteItem">Confirmer</v-btn>
@@ -263,193 +264,192 @@
   </v-container>
 </template>
 
-<script>
-import axios from 'axios';
-
-export default {
-  data() {
-    return {
-      search: '',
-      selectedGrade: null,
-      selectedUnite: null,
-      grades: [],
-      unites: [],
-      headers: [
-        { title: 'Nom', key: 'nom' },
-        { title: 'Prénom', key: 'prenom' },
-        { title: 'Matricule', key: 'matricule' },
-        { title: 'Grade', key: 'grade' },
-        { title: 'Unité', key: 'unite' },
-        { title: 'Actions', key: 'actions', sortable: false },
-      ],
-      employes: [],
-      editedItem: {},
-      dialog: false,
-      dialogDelete: false,
-      formTitle: '',
-      loading: false,
-      valid: false,
-
-      // Options for dropdowns and multi-value fields
-      sexOptions: ['Homme', 'Femme'],
-      situationFamilialeOptions: ['célibataire', 'Marié'],
-      niveauScolaireOptions: ['1ère', '2ème', '3ème', '4ème', '5ème'],
-      gradeOptions: ['agent', 'agent régional', 'Comn', 'capi'],
-      modeEngagementOptions: ['par voie directe', 'recrutement sur titre', 'direct', 'conversion'],
-      anneeScolaireOptions: ['1ère année', '2ème année', '3ème année', '4ème année'],
-      typeFormationOptions: ['informatique', 'musique', 'sport', 'presse'],
-      natureDiplomeOptions: ['civil', 'mili'],
-      specialiteOptions: ['web', 'mobile', 'sport', 'presse'],
-      specialitePartielleOptions: ['Dev web mobile', 'Dev web', 'sport', 'presse'],
-      formationsPrecedentesOptions: ['تكوين في إدارة', 'Dev web', 'تكوين شهادة في الرياضة'],
-      diplomesPrecedentsOptions: ['diplôme Dev web mobile', 'diplôme finance', 'diplôme électricien'],
-      autresDiplomesOptions: ['شهادة في الغرف', 'شهادة في الكرم'],
-      cycleOptions: ['1ère session', '2ème session'],
-      punitionOptions: ['15 JOUR', '30 JOUR'],
-      convalescencesOptions: ['15 JOUR', '30 JOUR'],
-      etatSanteOptions: ['مؤهل', 'غير مؤهل'],
-      diplomeObtenuOptions: ['technicien supérieur', 'licence', 'master'],
-      anneeFormationOptions: ['2022/2023', '2023/2024', '2024/2025'],
-
-    };
-  },
-  mounted() {
-    this.fetchEmployes();
-    this.fetchGradesAndUnites();
-  },
-  methods: {
-    async fetchEmployes() {
-      this.loading = true;
-      try {
-        const response = await axios.get('/api/employes', {
-          //   params: {
-          //     search: this.search,
-          //     grade: this.selectedGrade,
-          //     unite: this.selectedUnite,
-          //   },
-        });
-        this.employes = response.data;
-      } catch (error) {
-        console.error('Error fetching employes:', error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async fetchGradesAndUnites() {
-      try {
-        const response = await axios.get('/api/filters');
-        this.grades = response.data.grades;
-        this.unites = response.data.unites;
-      } catch (error) {
-        console.error('Error fetching filters:', error);
-      }
-    },
-    openDialog(item = null) {
-      this.editedItem = item ? { ...item } : {};
-      this.formTitle = item ? 'Modifier un employe' : 'Ajouter un employe';
-      this.dialog = true;
-    },
-    async save() {
-      if (!this.$refs.form.validate()) return;
-
-      // Convertir les tableaux en chaînes JSON pour les champs multi-valeurs
-      const payload = {
-        ...this.editedItem,
-        type_formation: JSON.stringify(this.editedItem.type_formation || []),
-        specialite: JSON.stringify(this.editedItem.specialite || []),
-        specialite_partielle: JSON.stringify(this.editedItem.specialite_partielle || []),
-        formations_precedentes: JSON.stringify(this.editedItem.formations_precedentes || []),
-        diplomes_precedents: JSON.stringify(this.editedItem.diplomes_precedents || []),
-        autres_diplomes: JSON.stringify(this.editedItem.autres_diplomes || []),
-        punition: JSON.stringify(this.editedItem.punition || []),
-        convalescences: JSON.stringify(this.editedItem.convalescences || []),
-        annee_formation: JSON.stringify(this.editedItem.annee_formation || []),
-        diplome_obtenu: JSON.stringify(this.editedItem.diplome_obtenu || []),
-      };
-
-      try {
-        if (this.editeditem.id_employe) {
-          // Mettre à jour l'employé
-          await axios.put(`/api/employes/${this.editeditem.id_employe}`, payload);
-        } else {
-          // Créer un nouvel employé
-          await axios.post('/api/employes', payload);
-        }
-        this.fetchEmployes();
-        this.dialog = false;
-      } catch (error) {
-        console.error('Error saving employee:', error);
-      }
-    },
-    async confirmDelete(item) {
-      this.editedItem = { ...item };
-      this.dialogDelete = true;
-    },
-    async deleteItem() {
-      try {
-        await axios.delete(`/api/employes/${this.editeditem.id_employe}`);
-        this.fetchEmployes();
-        this.dialogDelete = false;
-      } catch (error) {
-        console.error('Error deleting employes:', error);
-      }
-    },
-    async exportData(type) {
-      try {
-        const response = await axios.get(`/api/employes/export/${type}`, { responseType: 'blob' });
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `employees.${type}`);
-        document.body.appendChild(link);
-        link.click();
-      } catch (error) {
-        console.error('Error exporting data:', error);
-      }
-    },
-    async exportSinglePDF(item) {
-      try {
-        const response = await axios.get(`/api/employes/${item.id_employe}/export`, { responseType: 'blob' });
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${item.nom}_${item.prenom}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-      } catch (error) {
-        console.error('Error exporting PDF:', error);
-      }
-    },
-    close() {
-      this.dialog = false;
-    },
-    closeDelete() {
-      this.dialogDelete = false;
-    },
-  },
-};
-</script>
 <script setup>
-const convertToStage = async (item) => {
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+
+// Réactifs
+const search = ref('');
+const selectedGrade = ref(null);
+const selectedUnite = ref(null);
+const grades = ref([]);
+const unites = ref([]);
+const headers = ref([
+  { title: 'Nom', key: 'nom' },
+  { title: 'Prénom', key: 'prenom' },
+  { title: 'Matricule', key: 'matricule' },
+  { title: 'Grade', key: 'grade' },
+  { title: 'Unité', key: 'unite' },
+  { title: 'Actions', key: 'actions', sortable: false },
+]);
+const etudiants = ref([]);
+const editedItem = ref({});
+const dialog = ref(false);
+const dialogDelete = ref(false);
+const formTitle = ref('');
+const loading = ref(false);
+const valid = ref(false);
+
+// Options pour les menus déroulants
+const sexOptions = ['Homme', 'Femme'];
+const situationFamilialeOptions = ['célibataire', 'Marié'];
+const niveauScolaireOptions = ['1ère', '2ème', '3ème', '4ème', '5ème'];
+const gradeOptions = ['agent', 'agent régional', 'Comn', 'capi'];
+const modeEngagementOptions = ['par voie directe', 'recrutement sur titre', 'direct', 'conversion'];
+const anneeScolaireOptions = ['1ère année', '2ème année', '3ème année', '4ème année'];
+const typeFormationOptions = ['informatique', 'musique', 'sport', 'presse'];
+const natureDiplomeOptions = ['civil', 'mili'];
+const specialiteOptions = ['web', 'mobile', 'sport', 'presse'];
+const specialitePartielleOptions = ['Dev web mobile', 'Dev web', 'sport', 'presse'];
+const formationsPrecedentesOptions = ['تكوين في إدارة', 'Dev web', 'تكوين شهادة في الرياضة'];
+const diplomesPrecedentsOptions = ['diplôme Dev web mobile', 'diplôme finance', 'diplôme électricien'];
+const autresDiplomesOptions = ['شهادة في الغرف', 'شهادة في الكرم'];
+const cycleOptions = ['1ère session', '2ème session'];
+const punitionOptions = ['15 JOUR', '30 JOUR'];
+const convalescencesOptions = ['15 JOUR', '30 JOUR'];
+const etatSanteOptions = ['مؤهل', 'غير مؤهل'];
+const diplomeObtenuOptions = ['technicien supérieur', 'licence', 'master'];
+const anneeFormationOptions = ['2022/2023', '2023/2024', '2024/2025'];
+
+// Méthodes
+const fetchEtudiants = async () => {
+  loading.value = true;
+  try {
+    const response = await axios.get('/api/etudiants');
+    etudiants.value = response.data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des étudiants:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const convertToEmployee = async (item) => {
   console.log('Objet item :', item); // Log pour déboguer
 
-  if (!item?.id_employe) {
-    alert('ID de l\'employé non trouvé.');
+  if (!item?.id_etudiant) {
+    alert('ID de l\'étudiant non trouvé.');
     return;
   }
 
-  if (confirm('Êtes-vous sûr de vouloir convertir cet employé en stage ?')) {
+  if (confirm('Êtes-vous sûr de vouloir convertir cet étudiant en employé ?')) {
     try {
-      const response = await axios.post(`/api/employes/${item.id_employe}/convert-to-stage`);
+      console.log('ID de l\'étudiant à convertir :', item.id_etudiant); // Log pour déboguer
+      const response = await axios.post(`/api/etudiants/${item.id_etudiant}/convert-to-employee`);
       alert(response.data.message); // Afficher un message de succès
-      fetchEmployes(); // Rafraîchir la liste des employés
+      fetchEtudiants(); // Rafraîchir la liste des étudiants
     } catch (error) {
       console.error('Erreur lors de la conversion:', error);
       alert('Une erreur est survenue lors de la conversion.');
     }
   }
 };
+
+
+const fetchGradesAndUnites = async () => {
+  try {
+    const response = await axios.get('/api/filters');
+    grades.value = response.data.grades;
+    unites.value = response.data.unites;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des filtres:', error);
+  }
+};
+
+const openDialog = (item = null) => {
+  editedItem.value = item ? { ...item } : {};
+  formTitle.value = item ? 'Modifier un Étudiant' : 'Ajouter un Étudiant';
+  dialog.value = true;
+};
+
+const save = async () => {
+  if (!valid.value) return;
+
+  const payload = {
+    ...editedItem.value,
+    type_formation: JSON.stringify(editedItem.value.type_formation || []),
+    specialite: JSON.stringify(editedItem.value.specialite || []),
+    specialite_partielle: JSON.stringify(editedItem.value.specialite_partielle || []),
+    formations_precedentes: JSON.stringify(editedItem.value.formations_precedentes || []),
+    diplomes_precedents: JSON.stringify(editedItem.value.diplomes_precedents || []),
+    autres_diplomes: JSON.stringify(editedItem.value.autres_diplomes || []),
+    punition: JSON.stringify(editedItem.value.punition || []),
+    convalescences: JSON.stringify(editedItem.value.convalescences || []),
+    annee_formation: JSON.stringify(editedItem.value.annee_formation || []),
+    diplome_obtenu: JSON.stringify(editedItem.value.diplome_obtenu || []),
+  };
+
+  try {
+    if (editedItem.value.id) {
+      await axios.put(`/api/etudiants/${editedItem.value.id}`, payload);
+    } else {
+      await axios.post('/api/etudiants', payload);
+    }
+    fetchEtudiants();
+    dialog.value = false;
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error);
+  }
+};
+
+const confirmDelete = (item) => {
+  editedItem.value = { ...item };
+  dialogDelete.value = true;
+};
+
+const deleteItem = async () => {
+  try {
+    await axios.delete(`/api/etudiants/${editedItem.value.id}`);
+    fetchEtudiants();
+    dialogDelete.value = false;
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error);
+  }
+};
+
+const exportData = async (type) => {
+  try {
+    const response = await axios.get(`/api/etudiants/export/${type}`, { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `etudiants.${type}`);
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error('Erreur lors de l\'exportation:', error);
+  }
+};
+
+const exportSinglePDF = async (item) => {
+  try {
+    const response = await axios.get(`/api/etudiants/${item.id_etudiant}/export`, { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${item.nom}_${item.prenom}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error('Erreur lors de l\'exportation PDF:', error);
+  }
+};
+
+const close = () => {
+  dialog.value = false;
+};
+
+const closeDelete = () => {
+  dialogDelete.value = false;
+};
+
+// Lifecycle hook
+onMounted(() => {
+  fetchEtudiants();
+  fetchGradesAndUnites();
+});
 </script>
+
 <style scoped>
 .text-right {
   text-align: end;
