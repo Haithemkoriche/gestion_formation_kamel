@@ -31,6 +31,9 @@
         <v-btn icon small @click="confirmDelete(item)">
           <v-icon>tabler-trash</v-icon>
         </v-btn>
+        <v-btn icon small @click="convertToEmployee(item)">
+          <v-icon>tabler-user-plus</v-icon>
+        </v-btn>
       </template>
     </v-data-table>
 
@@ -69,12 +72,37 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Dialogue pour convertir en employé -->
+    <v-dialog v-model="dialogConvertToEmployee" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span>Convertir en Employé</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="formConvertToEmployee" v-model="validConvertToEmployee">
+            <v-container>
+              <!-- Sélection du grade -->
+              <v-select v-model="selectedGrade" :items="grades" label="Sélectionner un grade" required></v-select>
+
+              <!-- Sélection de l'unité -->
+              <v-select v-model="selectedUnite" :items="unites" label="Sélectionner une unité" required></v-select>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" text @click="closeConvertToEmployee">Annuler</v-btn>
+          <v-btn color="success" text @click="confirmConvertToEmployee">Confirmer</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script setup>
 import axios from 'axios';
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 // Réactifs
 const search = ref('');
@@ -89,6 +117,13 @@ const headers = ref([
   { title: 'Actions', key: 'actions', sortable: false },
 ]);
 const loading = ref(false);
+const dialogConvertToEmployee = ref(false);
+const validConvertToEmployee = ref(false);
+const selectedGrade = ref(null);
+const selectedUnite = ref(null);
+const grades = ref([]);
+const unites = ref([]);
+const selectedStagiaire = ref(null);
 
 // Méthodes
 const fetchStagiaires = async () => {
@@ -107,9 +142,52 @@ const fetchStagiaires = async () => {
   }
 };
 
+const fetchGradesAndUnites = async () => {
+  try {
+    const response = await axios.get('/api/filters');
+    grades.value = response.data.grades;
+    unites.value = response.data.unites;
+  } catch (error) {
+    console.error('Erreur lors de la récupération des grades et unités:', error);
+  }
+};
+
+const convertToEmployee = async (item) => {
+  selectedStagiaire.value = item;
+  dialogConvertToEmployee.value = true;
+};
+
+const confirmConvertToEmployee = async () => {
+  if (!validConvertToEmployee.value || !selectedStagiaire.value) return;
+
+  const payload = {
+    grade: selectedGrade.value,
+    unite: selectedUnite.value,
+    status: 'actif', // Changer le statut à "actif"
+  };
+
+  try {
+    const response = await axios.put(
+      `/api/employes/${selectedStagiaire.value.id_employe}/convert-to-employee`,
+      payload
+    );
+    alert(response.data.message); // Afficher un message de succès
+    fetchStagiaires(); // Rafraîchir la liste des stagiaires
+    dialogConvertToEmployee.value = false; // Fermer le dialogue
+  } catch (error) {
+    console.error('Erreur lors de la conversion:', error);
+    alert('Une erreur est survenue lors de la conversion.');
+  }
+};
+
+const closeConvertToEmployee = () => {
+  dialogConvertToEmployee.value = false;
+};
+
 // Lifecycle hook
 onMounted(() => {
   fetchStagiaires();
+  fetchGradesAndUnites();
 });
 </script>
 

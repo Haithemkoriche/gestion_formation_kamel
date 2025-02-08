@@ -180,20 +180,27 @@ class EmployeController extends Controller
 
         return $query->get();
     }
-    public function convertToStage($id)
+    public function convertToStage(Request $request, $id)
     {
         try {
             // Récupérer l'employé
             $employe = Employe::findOrFail($id);
-
-            // Vérifier si l'employé est déjà en stage
-            if ($employe->status === 'stage') {
-                return response()->json(['message' => 'Cet employé est déjà en stage.'], 400);
-            }
-
+    
+            // Valider les données de la requête
+            $validated = $request->validate([
+                'school_id' => 'required|exists:schools,id',
+                'formation_id' => 'required|exists:formations,id',
+                'duration' => 'required|integer|min:1',
+            ]);
+    
             // Mettre à jour le statut de l'employé
-            $employe->update(['status' => 'stage']);
-
+            $employe->update([
+                'status' => 'stage',
+                'school_id' => $validated['school_id'],
+                'formation_id' => $validated['formation_id'],
+                'stage_duration' => $validated['duration'],
+            ]);
+    
             return response()->json([
                 'message' => 'Employé converti en stage avec succès',
                 'employe' => $employe,
